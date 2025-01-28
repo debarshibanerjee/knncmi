@@ -8,7 +8,7 @@ The background and theory can be found on [arXiv](https://arxiv.org/abs/1912.033
 Once inside the git repository directory, use the package manager [pip](https://pip.pypa.io/en/stable/) to install `knncmi`.
 
 ```bash
-pip install knncmi
+pip install .
 ```
 
 ## Usage
