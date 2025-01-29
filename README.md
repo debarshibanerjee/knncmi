@@ -42,10 +42,12 @@ dataset = pd.read_csv(url, names=names)
 # estimate CMI between 'slength' and 'swidth' given 'class'
 cmi_result = k.cmi(['slength'], ['swidth'], ['class'], 3, dataset)
 print(f"CMI(slength, swidth | class): {cmi_result}")
+# 0.24623572430840526
 
 # estimate MI between 'class' and 'swidth'
 mi_result = k.cmi(['class'], ['swidth'], [], 3, dataset)
 print(f"MI(class, swidth): {mi_result}")
+# 0.21378704289138606
 
 # Example with a periodic variable
 n = 100
