@@ -194,6 +194,11 @@ def main():
     print(cmi(['x'],['y'],['theta'], 4, df_periodic, periodic_vars = periodic_vars)) # CMI(x,y|theta)
     print(cmi(['x'],['y'],['z'], 4, df_periodic, periodic_vars = periodic_vars)) # CMI(x,y|z)
 
+    # We expect:
+    # 1. MI(x, y) to be high because x and y are related through theta
+    # 2. CMI(x, y | theta) to be low because x and y are independent given theta
+    # 3. CMI(x, y | z) to be similar to MI(x, y) because z is independent
+
 
 if __name__ == '__main__':
     main()
