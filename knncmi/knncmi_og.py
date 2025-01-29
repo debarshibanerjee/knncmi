@@ -10,13 +10,12 @@ from scipy.special import digamma
 # if not equal
 # might need to be changed to something else later
 
-def getPairwiseDistArray(data, coords = [], discrete_dist = 1, periodic_vars = {}):
+def getPairwiseDistArray(data, coords = [], discrete_dist = 1):
     '''
-    Input:
+    Input: 
     data: pandas data frame
     coords: list of indices for variables to be used
     discrete_dist: distance to be used for non-numeric differences
-    periodic_vars: dictionary with keys as column indices and values as periods
 
     Output:
     p x n x n array with pairwise distances for each variable
@@ -30,13 +29,8 @@ def getPairwiseDistArray(data, coords = [], discrete_dist = 1, periodic_vars = {
     for coord in coords:
         thisdtype=data[col_names[coord]].dtype
         if pd.api.types.is_numeric_dtype(thisdtype):
-            diff = abs(data[col_names[coord]].to_numpy() -
+            distArray[coord,:,:] = abs(data[col_names[coord]].to_numpy() -
                                        data[col_names[coord]].to_numpy()[:,None])
-            if coord in periodic_vars:
-                period = periodic_vars[coord]
-                distArray[coord,:,:] = np.minimum(diff, period - diff)
-            else:
-                distArray[coord,:,:] = diff
         else:
             distArray[coord,:,:] = (1 - (data[col_names[coord]].to_numpy() ==
                                     data[col_names[coord]].to_numpy()[:,None])) * discrete_dist
@@ -44,7 +38,7 @@ def getPairwiseDistArray(data, coords = [], discrete_dist = 1, periodic_vars = {
 
 def getPointCoordDists(distArray, ind_i, coords = list()):
     '''
-    Input:
+    Input: 
     ind_i: current observation row index
     distArray: output from getPariwiseDistArray
     coords: list of variable (column) indices
@@ -58,12 +52,12 @@ def getPointCoordDists(distArray, ind_i, coords = list()):
 
 def countNeighbors(coord_dists, rho, coords = list()):
     '''
-    input: list of coordinate distances (output of coordDistList),
+    input: list of coordinate distances (output of coordDistList), 
     coordinates we want (coords), distance (rho)
 
     output: scalar integer of number of points within ell infinity radius
     '''
-
+    
     if not coords:
         coords = range(coord_dists.shape[1])
     dists = np.max(coord_dists[:,coords], axis = 1)
@@ -76,7 +70,7 @@ def getKnnDist(distArray, k):
     distArray: numpy 2D array of pairwise, coordinate wise distances,
     output from getPairwiseDistArray
     k: nearest neighbor value
-
+    
     output: (k, distance to knn)
     '''
     dists = np.max(distArray, axis = 1)
@@ -128,8 +122,8 @@ def miPoint(point_i, x, y, k, distArray):
     ny = countNeighbors(coord_dists, rho, y_coords)
     xi = digamma(k_tilde) + digamma(n) - digamma(nx) - digamma(ny)
     return xi
-
-def cmi(x, y, z, k, data, discrete_dist = 1, minzero = 1, periodic_vars = {}):
+    
+def cmi(x, y, z, k, data, discrete_dist = 1, minzero = 1):
     '''
     computes conditional mutual information, I(x,y|z)
     input:
@@ -138,7 +132,6 @@ def cmi(x, y, z, k, data, discrete_dist = 1, minzero = 1, periodic_vars = {}):
     z: list of indices for z
     k: hyper parameter for kNN
     data: pandas dataframe
-    periodic_vars: dictionary with keys as column indices and values as periods
 
     output:
     scalar value of I(x,y|z)
@@ -152,8 +145,8 @@ def cmi(x, y, z, k, data, discrete_dist = 1, minzero = 1, periodic_vars = {}):
         if all(type(elem) == str for elem in lst) and len(lst) > 0:
             vrbls[i] = list(data.columns.get_indexer(lst))
     x,y,z = vrbls
-
-    distArray = getPairwiseDistArray(data, x + y + z, discrete_dist, periodic_vars)
+            
+    distArray = getPairwiseDistArray(data, x + y + z, discrete_dist)
     if len(z) > 0:
         ptEsts = map(lambda obs: cmiPoint(obs, x, y, z, k, distArray), range(n))
     else:
@@ -162,27 +155,13 @@ def cmi(x, y, z, k, data, discrete_dist = 1, minzero = 1, periodic_vars = {}):
         return(max(sum(ptEsts)/n,0))
     elif minzero == 0:
         return(sum(ptEsts)/n)
-
+    
 def main():
     url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
     names = ['slength', 'swidth', 'plength', 'pwidth', 'class']
     df = pd.read_csv(url, names=names)
     print(cmi(['class'],['swidth'],['plength'], 4, df))
-
-    # Example with periodic variable
-    n = 100
-    theta = np.random.uniform(0, 2*np.pi, n)
-    x = np.cos(theta) + np.random.normal(0, 0.1, n)
-    y = np.sin(theta) + np.random.normal(0, 0.1, n)
-    z = np.random.normal(0, 1, n)
-    df_periodic = pd.DataFrame({'theta': theta, 'x': x, 'y': y, 'z': z})
-
-    periodic_vars = {'theta': 2*np.pi}  # Specify 'theta' as periodic with period 2*pi
-
-    print(cmi(['x'],['y'],[], 4, df_periodic, periodic_vars = periodic_vars)) # MI(x,y)
-    print(cmi(['x'],['y'],['theta'], 4, df_periodic, periodic_vars = periodic_vars)) # CMI(x,y|theta)
-    print(cmi(['x'],['y'],['z'], 4, df_periodic, periodic_vars = periodic_vars)) # CMI(x,y|z)
-
+    pass
 
 if __name__ == '__main__':
     main()
