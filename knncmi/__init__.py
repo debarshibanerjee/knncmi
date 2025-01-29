@@ -1,1 +1,1 @@
-from knncmi.knncmi  import *
+from knncmi.knncmi import *
