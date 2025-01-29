@@ -161,6 +161,14 @@ def main():
     names = ['slength', 'swidth', 'plength', 'pwidth', 'class']
     df = pd.read_csv(url, names=names)
     print(cmi(['class'],['swidth'],['plength'], 4, df))
+
+    # estimate CMI between 'slength' and 'swidth' given 'class'
+    print(cmi(['slength'], ['swidth'], ['class'], 3, df))
+    # 0.2653312593213504
+
+    # estimate MI between 'class' and 'swidth'
+    print(cmi(['class'], ['swidth'], [], 3, df))
+    # 0.24637878408866076
     pass
 
 if __name__ == '__main__':

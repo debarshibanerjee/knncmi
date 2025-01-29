@@ -169,7 +169,17 @@ def main():
     df = pd.read_csv(url, names=names)
     print(cmi(['class'],['swidth'],['plength'], 4, df))
 
+    # estimate CMI between 'slength' and 'swidth' given 'class'
+    print(cmi(['slength'], ['swidth'], ['class'], 3, df))
+    # 0.2653312593213504
+
+    # estimate MI between 'class' and 'swidth'
+    print(cmi(['class'], ['swidth'], [], 3, df))
+    # 0.24637878408866076
+
     # Example with periodic variable
+    # Set seed for reproducibility
+    np.random.seed(42)
     n = 100
     theta = np.random.uniform(0, 2*np.pi, n)
     x = np.cos(theta) + np.random.normal(0, 0.1, n)
@@ -179,6 +189,7 @@ def main():
 
     periodic_vars = {'theta': 2*np.pi}  # Specify 'theta' as periodic with period 2*pi
 
+    print("PERIODIC:")
     print(cmi(['x'],['y'],[], 4, df_periodic, periodic_vars = periodic_vars)) # MI(x,y)
     print(cmi(['x'],['y'],['theta'], 4, df_periodic, periodic_vars = periodic_vars)) # CMI(x,y|theta)
     print(cmi(['x'],['y'],['z'], 4, df_periodic, periodic_vars = periodic_vars)) # CMI(x,y|z)
