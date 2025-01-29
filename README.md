@@ -29,19 +29,46 @@ The code below shows how to use the `knncmi` package and `cmi` function.
 ```python
 import knncmi as k
 import pandas as pd
+import numpy as np
 
-# Read dataset to pandas dataframe
+# Set seed for reproducibility
+np.random.seed(42)
+
+# Read dataset to pandas dataframe (Iris dataset)
 url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
 names = ['slength', 'swidth', 'plength', 'pwidth', 'class']
 dataset = pd.read_csv(url, names=names)
 
 # estimate CMI between 'slength' and 'swidth' given 'class'
-k.cmi(['slength'], ['swidth'], ['class'], 3, dataset)
-# 0.2653312593213504
+cmi_result = k.cmi(['slength'], ['swidth'], ['class'], 3, dataset)
+print(f"CMI(slength, swidth | class): {cmi_result}")
 
 # estimate MI between 'class' and 'swidth'
-k.cmi(['class'], ['swidth'], [], 3, dataset)
-# 0.24637878408866076
+mi_result = k.cmi(['class'], ['swidth'], [], 3, dataset)
+print(f"MI(class, swidth): {mi_result}")
+
+# Example with a periodic variable
+n = 100
+theta = np.random.uniform(0, 2*np.pi, n)
+x = np.cos(theta) + np.random.normal(0, 0.1, n)
+y = np.sin(theta) + np.random.normal(0, 0.1, n)
+z = np.random.normal(0, 1, n)
+df_periodic = pd.DataFrame({'theta': theta, 'x': x, 'y': y, 'z': z})
+
+periodic_vars = {'theta': 2*np.pi}  # Specify 'theta' as periodic
+
+mi_xy = k.cmi(['x'], ['y'], [], 4, df_periodic, periodic_vars=periodic_vars)
+cmi_xy_theta = k.cmi(['x'], ['y'], ['theta'], 4, df_periodic, periodic_vars=periodic_vars)
+cmi_xy_z = k.cmi(['x'], ['y'], ['z'], 4, df_periodic, periodic_vars=periodic_vars)
+
+print(f"MI(x, y): {mi_xy}")
+# 0.788970661696498
+
+print(f"CMI(x, y | theta): {cmi_xy_theta}")
+# 0.03034523809523808
+
+print(f"CMI(x, y | z): {cmi_xy_z}")
+# 0.32604131072549014
 ``` 
 
 ## Simulations
